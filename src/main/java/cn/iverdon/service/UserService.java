@@ -1,5 +1,6 @@
 package cn.iverdon.service;
 
+import cn.iverdon.enums.SearchFriendsStatusEnum;
 import cn.iverdon.mapper.MyFriendsMapper;
 import cn.iverdon.mapper.UsersMapper;
 import cn.iverdon.model.MyFriends;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 
@@ -111,12 +113,18 @@ public class UserService implements UserDetailsService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public Integer preconditionSearchFriend(String myUserId, String friendName){
         //前置条件-1.搜索的用户不存在，返回【无此用户】
-
+        Users user = queryUserInfoByUsername(friendName);
+        if (user == null){
+            return SearchFriendsStatusEnum.USER_NOT_EXIST.status;
+        }
         return null;
     }
 
 
     public Users queryUserInfoByUsername(String username){
-
+        Example ue = new Example(Users.class);
+        Example.Criteria criteria = ue.createCriteria();
+        criteria.andEqualTo("username",username);
+        return usersMapper.selectOneByExample(ue);
     }
 }

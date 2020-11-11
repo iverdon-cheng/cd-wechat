@@ -1,9 +1,10 @@
 package cn.iverdon.mapper;
 
 import cn.iverdon.model.Users;
+import cn.iverdon.utils.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
-public interface UsersMapper  {
+public interface UsersMapper extends MyMapper<Users> {
 
     Users loadUserByUsername(String username);
 

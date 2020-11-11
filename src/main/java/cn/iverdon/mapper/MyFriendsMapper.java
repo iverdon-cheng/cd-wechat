@@ -1,4 +1,7 @@
 package cn.iverdon.mapper;
 
-public interface MyFriendsMapper {
+import cn.iverdon.model.MyFriends;
+import cn.iverdon.utils.MyMapper;
+
+public interface MyFriendsMapper extends MyMapper<MyFriends> {
 }
