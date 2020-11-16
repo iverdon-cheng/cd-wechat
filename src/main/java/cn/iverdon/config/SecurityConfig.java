@@ -2,13 +2,11 @@ package cn.iverdon.config;
 
 import cn.iverdon.model.RespBean;
 import cn.iverdon.model.Users;
-import cn.iverdon.service.UserService;
-import cn.iverdon.utils.QRCodeUtils;
+import cn.iverdon.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +15,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -36,7 +33,7 @@ import java.io.PrintWriter;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-    UserService userService;
+    UserServiceImpl userServiceImpl;
 
 
     @Bean
@@ -50,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    }
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService);
+        auth.userDetailsService(userServiceImpl);
     }
 
     @Override
@@ -88,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         httpServletResponse.setContentType("application/json;charset=utf-8");
                         PrintWriter out = httpServletResponse.getWriter();
                         RespBean respBean = RespBean.errorMsg("登录失败！");
-                        Users user = userService.selectByUsername(httpServletRequest.getParameter("username"));
+                        Users user = userServiceImpl.selectByUsername(httpServletRequest.getParameter("username"));
                         if (user == null) {
                             user = new Users();
                             user.setUsername(httpServletRequest.getParameter("username"));
@@ -98,7 +95,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                             user.setFaceImageBig("");
                             user.setQrcode("");
                             user.setCid(httpServletRequest.getParameter("cid"));
-                            if (userService.insert(user) == 1) {
+                            if (userServiceImpl.insert(user) == 1) {
                                 respBean.setMsg("您已注册新账号，请记住密码");
                             }
                         }else {

@@ -3,6 +3,7 @@ package cn.iverdon.model;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Collection;
@@ -16,8 +17,10 @@ public class Users implements UserDetails {
 
     private String password;
 
+    @Column(name = "face_image")
     private String faceImage;
 
+    @Column(name = "face_image_big")
     private String faceImageBig;
 
     private String nickname;

@@ -17,4 +17,5 @@ public interface UsersMapper extends MyMapper<Users> {
     int updateNickname(@Param("id") String id, @Param("nickName") String nickName);
 
     Users queryUserById(String id);
+
 }
