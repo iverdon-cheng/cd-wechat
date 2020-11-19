@@ -1,16 +1,15 @@
 package cn.iverdon.service.impl;
 
+import cn.iverdon.enums.MsgSignFlagEnum;
 import cn.iverdon.enums.SearchFriendsStatusEnum;
-import cn.iverdon.mapper.FriendsRequestMapper;
-import cn.iverdon.mapper.MyFriendsMapper;
-import cn.iverdon.mapper.UsersMapper;
-import cn.iverdon.mapper.UsersMapperCustom;
+import cn.iverdon.mapper.*;
 import cn.iverdon.model.FriendsRequest;
 import cn.iverdon.model.MyFriends;
 import cn.iverdon.model.Users;
 
 import cn.iverdon.model.vo.FriendRequestVO;
 import cn.iverdon.model.vo.MyFriendsVO;
+import cn.iverdon.netty.ChatMsg;
 import cn.iverdon.service.UserService;
 import cn.iverdon.utils.FastDFSClient;
 import cn.iverdon.utils.FileUtils;
@@ -43,6 +42,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Autowired
+    private ChatMsgMapper chatMSgMapper;
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -227,5 +229,22 @@ public class UserServiceImpl implements UserService {
             friend.setFriendFaceImage(UsersUtil.getTokenIn(friend.getFriendFaceImage()));
         }
         return myFriends;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public String saveMsg(ChatMsg chatMsg) {
+
+        cn.iverdon.model.ChatMsg msgDB = new cn.iverdon.model.ChatMsg();
+        String msgId = sid.nextShort();
+        msgDB.setId(msgId);
+        msgDB.setAcceptUserId(chatMsg.getReceiverId());
+        msgDB.setSendUserId(chatMsg.getSenderId());
+        msgDB.setCreateTime(new Date());
+        msgDB.setSignFlag(MsgSignFlagEnum.unsigned.type);
+        msgDB.setMsg((chatMsg.getMsg()));
+
+        chatMSgMapper.insert(msgDB);
+        return msgId;
     }
 }

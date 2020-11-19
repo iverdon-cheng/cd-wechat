@@ -1,5 +1,10 @@
 package cn.iverdon.netty;
 
+import cn.iverdon.SpringUtil;
+import cn.iverdon.enums.MsgActionEnum;
+import cn.iverdon.service.UserService;
+import cn.iverdon.utils.JsonUtils;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -17,14 +22,47 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
     public static ChannelGroup users =
             new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         String content = msg.text();
+        Channel currentChannel = ctx.channel();
+
         //1.获取客户端发来的消息
+        DataContent dataContent = JsonUtils.jsonToPojo(content,DataContent.class);
+        Integer action = dataContent.getAction();
         //2.判断消息类型，根据不同的类型来处理不同的业务
-        //  2.1 当websocket第一次open的时候，初始化channel，把用户的channel和userId关联起来
-        //  2.2 聊天类型的消息，把聊天记录保存到数据库 标记消息的签收状态[未签收]
-        //  2.3 签收消息的类型，针对具体的消息进行签收，修改数据库中对应消息的签收状态[已签收]
-        //  2.4 心跳类型的消息
+        if (action == MsgActionEnum.CONNECT.type) {
+            //  2.1 当websocket第一次open的时候，初始化channel，把用户的channel和userId关联起来
+            String senderId = dataContent.getChatMsg().getSenderId();
+            UserChannelRel.put(senderId,currentChannel);
+
+        }else if (action == MsgActionEnum.CHAT.type){
+            //  2.2 聊天类型的消息，把聊天记录保存到数据库 标记消息的签收状态[未签收]
+            ChatMsg chatMsg = dataContent.getChatMsg();
+            String Msg = chatMsg.getMsg();
+            String receiverId = chatMsg.getReceiverId();
+            String senderId = chatMsg.getSenderId();
+
+            //保存消息到数据库，并且标记为 未签收
+            UserService userService = (UserService) SpringUtil.getBean("userServiceImpl");
+            String msgId = userService.saveMsg(chatMsg);
+            chatMsg.setMsgId(msgId);
+
+            //发送消息
+            //从全局用户Channel关系中获取接收方的channel
+            Channel receiverChannel = UserChannelRel.get(receiverId);
+            if ( receiverChannel == null){
+                // TODO channel为空代表用户离线，推送消息(JPush,个推，小米推送)
+            }else {
+
+            }
+        }else if (action == MsgActionEnum.SIGNED.type){
+            //  2.3 签收消息的类型，针对具体的消息进行签收，修改数据库中对应消息的签收状态[已签收]
+
+        }else if (action == MsgActionEnum.KEEPALIVE.type){
+            //  2.4 心跳类型的消息
+
+        }
+
 
 
     }

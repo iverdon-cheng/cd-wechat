@@ -1,4 +1,7 @@
 package cn.iverdon.mapper;
 
-public interface ChatMsgMapper {
+import cn.iverdon.model.ChatMsg;
+import cn.iverdon.utils.MyMapper;
+
+public interface ChatMsgMapper extends MyMapper<ChatMsg> {
 }

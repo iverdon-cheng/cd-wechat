@@ -3,6 +3,7 @@ package cn.iverdon.service;
 import cn.iverdon.model.Users;
 import cn.iverdon.model.vo.FriendRequestVO;
 import cn.iverdon.model.vo.MyFriendsVO;
+import cn.iverdon.netty.ChatMsg;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -49,4 +50,9 @@ public interface UserService extends UserDetailsService {
     void passFriendRequest(String acceptUserId, String sendUserId);
 
     List<MyFriendsVO> queryMyFriends(String myId);
+
+    /**
+     * @Description: 保存聊天消息到数据库
+     */
+    public String saveMsg(ChatMsg chatMsg);
 }
